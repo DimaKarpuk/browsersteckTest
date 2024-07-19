@@ -1,7 +1,6 @@
-package drivers;
+package config;
 
 import com.codeborne.selenide.WebDriverProvider;
-import config.DataConfig;
 import org.aeonbits.owner.ConfigFactory;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.MutableCapabilities;
@@ -18,6 +17,11 @@ public class BrowserstackDriver implements WebDriverProvider {
                     DataConfig.class,
                     System.getProperties()
             );
+    private static final DeviceConfig device =
+            ConfigFactory.create(
+                    DeviceConfig.class,
+                    System.getProperties()
+            );
     @Nonnull
     @Override
     public WebDriver createDriver(@Nonnull Capabilities capabilities) {
@@ -28,11 +32,11 @@ public class BrowserstackDriver implements WebDriverProvider {
         caps.setCapability("browserstack.key", dataConfig.accessKey());
 
         // Set URL of the application under test
-        caps.setCapability("app", "bs://c700ce60cf13ae8ed97705a55b8e022f13c5827c");
+        caps.setCapability("app", device.app());
 
         // Specify device and os_version for testing
-        caps.setCapability("device", dataConfig.device());
-        caps.setCapability("os_version", dataConfig.version());
+        caps.setCapability("device", device.device());
+        caps.setCapability("os_version", device.version());
 
         // Set other BrowserStack capabilities
         caps.setCapability("project", "First Java Project");
@@ -43,7 +47,7 @@ public class BrowserstackDriver implements WebDriverProvider {
         // and desired capabilities defined above
         try {
             return new RemoteWebDriver(
-                    new URL("https://hub.browserstack.com/wd/hub"), caps);
+                    new URL(dataConfig.url()), caps);
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
